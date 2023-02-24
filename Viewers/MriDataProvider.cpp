@@ -23,6 +23,10 @@ bool MriDataProvider::setDirectory(QString dir) {
     // Убираем "file://"
     directory.erase(directory.begin(), directory.begin() + 7);
 
+    if(model_actor)
+        model_viewer->getRenderer()->removeActor(model_actor);
+
+    // Запускаем построение модели в отдельном потоке
     std::thread t1(buildModelInThread);
 
     // Сохраняем данные исследования для vtk
@@ -35,6 +39,7 @@ bool MriDataProvider::setDirectory(QString dir) {
     for(int i = 0; i != 3; ++i)
         plane_viewer[i]->getRenderer()->setData(data);
 
+    // Обновление данных в просмотрщиках проекций (plane_widget)
     model_viewer->getRenderer()->setData(data);
 
     // Обновляем размерность для слайдеров
@@ -51,7 +56,14 @@ bool MriDataProvider::setDirectory(QString dir) {
     windowRange = range[1] - range[0];
     emit windowRangeChanged();
 
+    // Задаем значения window-level в plane_widget
+    model_viewer->getRenderer()->setWindow(windowRange);
+    model_viewer->getRenderer()->setLevel(windowRange / 2);
+
+    // Дожидаемся выполнения потока
     t1.join();
+
+    // Передаем полученную модель в просмотр
     model_viewer->getRenderer()->addActor(model_actor);
 
     return true;
@@ -169,4 +181,3 @@ void MriDataProvider::setSlice(int i, int slice) {
     plane_viewer[i]->getRenderer()->setSlice(slice);
     model_viewer->getRenderer()->setSlice(i, slice);
 }
-

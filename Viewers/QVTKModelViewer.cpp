@@ -151,18 +151,24 @@ void QVTKModelViewerRenderer::setData(vtkImageData* data) {
 }
 
 void QVTKModelViewerRenderer::setSlice(int i, int slice) {
+    if(!plane_widget[0])
+        return;
     m_slice[i] = slice;
     slice_changed = true;
     this->update();
 }
 
 void QVTKModelViewerRenderer::setWindow(int window) {
+    if(!plane_widget[0])
+        return;
     m_window = window;
     window_level_changed = true;
     this->update();
 }
 
 void QVTKModelViewerRenderer::setLevel(int level) {
+    if(!plane_widget[0])
+        return;
     m_level = level;
     window_level_changed = true;
     this->update();
@@ -284,21 +290,27 @@ void QVTKModelViewerRenderer::handleEvents() {
 }
 
 void QVTKModelViewerRenderer::initPlaneViewers() {
-    vtkNew<vtkCellPicker> picker;
-    picker->SetTolerance(0.005);
-    vtkNew<vtkProperty> plane_widget_property;
+    data_changed = false;
+
+
+    if(plane_widget[0]) {
+        for(int i = 0; i != 3; ++i) {
+            m_slice[i] = data->GetDimensions()[i] / 2;
+            plane_widget[i]->SetInputData(data);
+            plane_widget[i]->SetSliceIndex(m_slice[i]);
+        }
+        return;
+    }
 
     for(int i = 0; i != 3; ++i) {
         m_slice[i] = data->GetDimensions()[i] / 2;
         plane_widget[i] = vtkSmartPointer<vtkImagePlaneWidget>::New();
         plane_widget[i]->SetInteractor(m_interactor);
-        plane_widget[i]->SetPicker(picker);
         plane_widget[i]->RestrictPlaneToVolumeOn();
         double color[3] = {0,0,0};
         color[i] = 1;
         plane_widget[i]->GetPlaneProperty()->SetColor(color);
 
-        plane_widget[i]->SetTexturePlaneProperty(plane_widget_property);
         plane_widget[i]->TextureInterpolateOff();
         plane_widget[i]->SetResliceInterpolateToLinear();
         plane_widget[i]->SetInputData(data);
@@ -310,8 +322,6 @@ void QVTKModelViewerRenderer::initPlaneViewers() {
         plane_widget[i]->On();
         plane_widget[i]->InteractionOn();
     }
-
-    data_changed = false;
 }
 
 void QVTKModelViewerRenderer::updateWindowLevel() {

@@ -9,7 +9,7 @@ import VTK 8.2
 Window {
     id: root
     property bool utv: false
-    width: 800
+    width: 1000
     height: 800
     color: "lightblue"
 
@@ -66,6 +66,20 @@ Window {
                     }
                     onMoved: {
                         mri_data_provider.setLevel(value)
+                    }
+                }
+
+                Button {
+                    id: button
+                    text: "Открыть исследование"
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        bottom: parent.bottom
+                        margins: 10
+                    }
+                    onClicked: {
+                        open_directory_dialog.open()
                     }
                 }
             }
@@ -159,18 +173,6 @@ Window {
                     Layout.preferredHeight: parent.height * 0.05
                 }
             }
-        }
-    }
-
-    Button {
-        id: button
-        text: "Открыть исследование"
-        anchors {
-            right: parent.right
-            bottom: parent.bottom
-        }
-        onClicked: {
-            open_directory_dialog.open()
         }
     }
 
