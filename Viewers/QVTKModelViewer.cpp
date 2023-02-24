@@ -316,11 +316,8 @@ void QVTKModelViewerRenderer::initPlaneViewers() {
         plane_widget[i]->SetInputData(data);
         plane_widget[i]->SetPlaneOrientation(i);
         plane_widget[i]->SetSliceIndex(m_slice[i]);
-        plane_widget[i]->DisplayTextOn();
         plane_widget[i]->SetDefaultRenderer(m_renderer);
-        plane_widget[i]->SetWindowLevel(900, 200);
         plane_widget[i]->On();
-        plane_widget[i]->InteractionOn();
     }
 }
 

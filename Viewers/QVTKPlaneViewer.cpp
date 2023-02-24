@@ -7,6 +7,7 @@
 #include <vtkDICOMImageReader.h>
 #include <vtkImageActor.h>
 #include <vtkPointData.h>
+#include <vtkCellPicker.h>
 
 
 QVTKPlaneViewerItem::QVTKPlaneViewerItem() {
@@ -33,8 +34,9 @@ void QVTKPlaneViewerItem::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void QVTKPlaneViewerItem::mousePressEvent(QMouseEvent *e) {
-    if(e->button() == Qt::LeftButton)
+    if(e->button() == Qt::LeftButton) {
         m_fbo_renderer->setMousePressEventL(e);
+    }
 
     else if(e->button() == Qt::RightButton)
         m_fbo_renderer->setMousePressEventR(e);
@@ -248,17 +250,23 @@ void QVTKPlaneViewerRenderer::setMouseReleaseEventR(QMouseEvent* e) {
 }
 
 void QVTKPlaneViewerRenderer::handleEvents() {
-    // Колесо мыши нажато
-    //if(m_mouse_press_w && !m_mouse_press_w->isAccepted()) {
-    //    m_interactor->SetEventInformationFlipY(m_mouse_press_w->x(), m_mouse_press_w->y());
-    //    m_interactor->InvokeEvent(vtkCommand::MiddleButtonPressEvent, m_mouse_press_w.get());
-    //    m_mouse_press_w->accept();
-    //}
-
     // ЛКМ нажата
-    if(m_mouse_press_l && !m_mouse_press_l->isAccepted()) {
-        m_interactor->SetEventInformationFlipY(m_mouse_press_l->x(), m_mouse_press_l->y());
-        //m_interactor->InvokeEvent(vtkCommand::LeftButtonPressEvent, m_mouse_press_l.get());
+    if(picking_enabled && m_mouse_press_l && !m_mouse_press_l->isAccepted()) {
+        std::cout << " PiZdA" << std::endl;
+        // Перевод принятых координат из qml в vtk'шные
+        int x,y;
+        x = m_mouse_press_l->x();
+        y = m_renderer->GetSize()[1] - m_mouse_press_l->y();
+
+        // Пик точки в пространстве
+        vtkNew<vtkCellPicker> picker;
+        picker->SetTolerance(0.005);
+        picker->Pick(x, y, 0, m_renderer);
+        double world_pos[3];
+        picker->GetPickPosition(world_pos);
+
+        MriDataProvider::getInstance().setBasePoint(world_pos);
+
         m_mouse_press_l->accept();
     }
 
@@ -276,19 +284,12 @@ void QVTKPlaneViewerRenderer::handleEvents() {
         m_mouse_move->accept();
     }
 
-    // Колесо мыши отжато
-    //if(m_mouse_release_w && !m_mouse_release_w->isAccepted()) {
-    //    m_interactor->SetEventInformationFlipY(m_mouse_release_w->x(), m_mouse_release_w->y());
-    //    m_interactor->InvokeEvent(vtkCommand::MiddleButtonReleaseEvent, m_mouse_release_w.get());
-    //    m_mouse_release_w->accept();
-    //}
-
     // ЛКМ отжата
-    if(m_mouse_release_l && !m_mouse_release_l->isAccepted()) {
-        m_interactor->SetEventInformationFlipY(m_mouse_release_l->x(), m_mouse_release_l->y());
-        //m_interactor->InvokeEvent(vtkCommand::LeftButtonReleaseEvent, m_mouse_release_l.get());
-        m_mouse_release_l->accept();
-    }
+    //if(m_mouse_release_l && !m_mouse_release_l->isAccepted()) {
+    //    m_interactor->SetEventInformationFlipY(m_mouse_release_l->x(), m_mouse_release_l->y());
+    //    //m_interactor->InvokeEvent(vtkCommand::LeftButtonReleaseEvent, m_mouse_release_l.get());
+    //    m_mouse_release_l->accept();
+    //}
 
     // ПКМ отжата
     if(m_mouse_release_r && !m_mouse_release_r->isAccepted()) {

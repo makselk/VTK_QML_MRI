@@ -81,6 +81,13 @@ void MriDataProvider::setLevel(int value) {
     model_viewer->getRenderer()->setLevel(value);
 }
 
+void MriDataProvider::pickBasePoint(int point) {
+    picking_base_point = point;
+    for(int i = 0; i != 3; ++i) {
+        plane_viewer[i]->getRenderer()->pickingOn();
+    }
+}
+
 MriDataProvider::MriDataProvider() {
     this->directory = "";
     this->data = vtkSmartPointer<vtkImageData>::New();
@@ -89,10 +96,6 @@ MriDataProvider::MriDataProvider() {
 MriDataProvider& MriDataProvider::getInstance() {
     static MriDataProvider provider;
     return provider;
-}
-
-const std::string& MriDataProvider::getDirectory() {
-    return directory;
 }
 
 void MriDataProvider::addPlaneViewer(QVTKPlaneViewerItem *viewer) {
@@ -112,6 +115,18 @@ void MriDataProvider::buildModel() {
     model_actor = vtkSmartPointer<vtkActor>::New();
     model_actor->SetMapper(mapper);
     model_actor->GetProperty()->SetDiffuseColor(0.93, 0.71, 0.63);
+}
+
+void MriDataProvider::setBasePoint(double* point) {
+    if(picking_base_point == -1)
+        return;
+    for(int i = 0; i != 3; ++i) {
+        // Обновляем значение
+        base_points[picking_base_point][i] = point[i];
+        // Выключаем пикинг в plane_viewer'ах
+        plane_viewer[i]->getRenderer()->pickingOff();
+    }
+    picking_base_point = -1;
 }
 
 bool MriDataProvider::readDirectoryVtk() {

@@ -89,6 +89,8 @@ public:
     void setSlice(int slice);
     void setWindow(int value);
     void setLevel(int value);
+    void pickingOn()  {picking_enabled = true;}
+    void pickingOff() {picking_enabled = false;}
 
 public:
     // Методы для сохранения событий
@@ -107,6 +109,7 @@ private:
     void handleEvents();
 
 private:
+    bool picking_enabled = false;
     bool data_changed = false;
     bool interaction = false;
     bool slice_changed = false;

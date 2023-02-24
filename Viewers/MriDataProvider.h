@@ -47,6 +47,7 @@ public slots:
     void setSlice_2(const int&s) {setSlice(2, s);}
     void setWindow(int value);
     void setLevel(int level);
+    void pickBasePoint(int point);
 
 private:
     MriDataProvider();
@@ -58,26 +59,42 @@ public:
     ~MriDataProvider() = default;
 
 public:
-    const std::string& getDirectory();
+    // Добавление ссылок на объекты, использующие провайдера
     void addPlaneViewer(QVTKPlaneViewerItem* plane_viewer);
     void addModelViewer(QVTKModelViewerItem* item);
+    // Выполнение построения актера модели
     void buildModel();
+    // Дергается из plane_viewer'a
+    // Сохраняет значение пикнутой точки
+    void setBasePoint(double* point);
 
 private:
+    // Чтение директории с исследованием с преобразованием координат
     bool readDirectoryVtk();
+    // Задание номера среза в объектах, использующих провайдера
     void setSlice(int i, int slice);
 
 private:
+    // Директория с исследованием
     std::string directory;
+    // Объемные данные (volume data)
     vtkSmartPointer<vtkImageData> data;
 
+    // Ссылки на объекты, использующие провайдера
+    QVTKModelViewerItem* model_viewer;
+    QVTKPlaneViewerItem* plane_viewer[3];
+
+    // Директория и имя сохраняемой модели
     std::string model_directory = "/home/boiii/models";
     std::string model_filename = "model";
+    // Модель и актер головы в vtk
     vtkSmartPointer<vtkPolyData> model;
     vtkSmartPointer<vtkActor> model_actor;
 
-    QVTKModelViewerItem* model_viewer;
-    QVTKPlaneViewerItem* plane_viewer[3];
+    // Координаты базовых точек (инион, насион, козелок левый и правый)
+    double base_points[4][3] = {0};
+    // Номер точки, выбор которой происходит на данный момент
+    int picking_base_point = -1;
 };
 
 #endif // MRI_DATA_PROVIDER_H

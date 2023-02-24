@@ -9,8 +9,8 @@ import VTK 8.2
 Window {
     id: root
     property bool utv: false
-    width: 1000
-    height: 800
+    width: 1200
+    height: 900
     color: "lightblue"
 
     Rectangle {
@@ -70,6 +70,65 @@ Window {
                 }
 
                 Button {
+                    id: button_i
+                    text: "Инион"
+                    anchors {
+                        left: parent.left
+                        right: parent.horizontalCenter
+                        bottom: button_tl.top
+                        margins: 10
+                    }
+                    onClicked: mri_data_provider.pickBasePoint(0)
+                }
+
+                Button {
+                    id: button_n
+                    text: "Насион"
+                    anchors {
+                        left: parent.horizontalCenter
+                        right: parent.right
+                        bottom: button_tr.top
+                        margins: 10
+                    }
+                    onClicked: mri_data_provider.pickBasePoint(1)
+                }
+
+                Button {
+                    id: button_tl
+                    text: "Козелок Л"
+                    anchors {
+                        left: parent.left
+                        right: parent.horizontalCenter
+                        bottom: button_points.top
+                        margins: 10
+                    }
+                    onClicked: mri_data_provider.pickBasePoint(2)
+                }
+
+                Button {
+                    id: button_tr
+                    text: "Козелок П"
+                    anchors {
+                        left: parent.horizontalCenter
+                        right: parent.right
+                        bottom: button_points.top
+                        margins: 10
+                    }
+                    onClicked: mri_data_provider.pickBasePoint(3)
+                }
+
+                Button {
+                    id: button_points
+                    text: "Построить точки 10-20"
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        bottom: button.top
+                        margins: 10
+                    }
+                }
+
+                Button {
                     id: button
                     text: "Открыть исследование"
                     anchors {
@@ -85,7 +144,7 @@ Window {
             }
 
             ColumnLayout {
-                id:mid_col
+                id: mid_col
                 Layout.fillWidth: true
                 Layout.preferredWidth: parent.width * 0.4
                 Layout.preferredHeight: parent.height
