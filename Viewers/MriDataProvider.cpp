@@ -1,6 +1,7 @@
 #include "MriDataProvider.h"
 #include "Model/model_builder.hpp"
 #include "Points/layout_10_20.hpp"
+#include "Points/strech_grid.hpp"
 
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
@@ -29,6 +30,8 @@ bool MriDataProvider::setDirectory(QString dir) {
 
     // Запускаем построение модели в отдельном потоке
     std::thread t1(buildModelInThread);
+
+    resetProviderData();
 
     // Сохраняем данные исследования для vtk
     if(!this->readDirectoryVtk()) {
@@ -124,18 +127,25 @@ void MriDataProvider::buildPoints10_20() {
         points10_20actors[i] = LAYOUT_10_20::pointActor(point, 0, 0, 1);
         model_viewer->getRenderer()->addActor(points10_20actors[i]);
     }
+}
 
-    double test_point_0[3];
-    double test_point_1[3];
-    double test_point_2[3];
-
-    getPoint10_20("F3", test_point_0);
-    getPoint10_20("Pz", test_point_1);
-    getPoint10_20("T4", test_point_2);
-
-    std::cout << test_point_0[0] << " " << test_point_0[1] << " " << test_point_0[2] << std::endl;
-    std::cout << test_point_1[0] << " " << test_point_1[1] << " " << test_point_1[2] << std::endl;
-    std::cout << test_point_2[0] << " " << test_point_2[1] << " " << test_point_2[2] << std::endl;
+void MriDataProvider::buildNavPoints() {
+    // Удаляем старые точки с просмотра
+    if(nav_points_actor)
+        model_viewer->getRenderer()->removeActor(nav_points_actor);
+    // Находим новые
+    vtkNew<vtkPolyData> points_data;
+    double pos[3];
+    getPoint10_20("F3", pos);
+    nav_points = STRECH_GRID::stretchGridOnModel(200, 1.5, pos, model,
+                                                 base_points[4], kd_tree,
+                                                 obb_tree, points_data);
+    // Строим новые точки на 3д просмотре
+    vtkNew<vtkPolyDataMapper> mapper;
+    mapper->SetInputData(points_data);
+    nav_points_actor = vtkSmartPointer<vtkActor>::New();
+    nav_points_actor->SetMapper(mapper);
+    model_viewer->getRenderer()->addActor(nav_points_actor);
 }
 
 MriDataProvider::MriDataProvider() {
@@ -294,4 +304,26 @@ void MriDataProvider::initMap10_20() {
     points10_20map["T6"] = 18;
     points10_20map["P3"] = 19;
     points10_20map["P4"] = 20;
+}
+
+void MriDataProvider::resetProviderData() {
+    // Очистка базовых точек
+    for(int i = 0; i != 4; ++i)
+        model_viewer->getRenderer()->removeActor(base_points_actors[i]);
+    for(int i = 0; i != 5; ++i) {
+        for(int j = 0; j != 3; ++j) {
+            base_points[i][j] = 0.0;
+        }
+    }
+    // Очистка деревьев
+    kd_tree = nullptr;
+    obb_tree = nullptr;
+    // Очистка точек 10-20
+    for(int i = 0; i != 21; ++i) {
+        model_viewer->getRenderer()->removeActor(points10_20actors[i]);
+        points10_20actors[i] = nullptr;
+    }
+    // Очистка точек навигации
+    model_viewer->getRenderer()->removeActor(nav_points_actor);
+    nav_points_actor = nullptr;
 }

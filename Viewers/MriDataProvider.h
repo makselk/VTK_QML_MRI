@@ -52,6 +52,7 @@ public slots:
     void setLevel(int level);
     void pickBasePoint(int point);
     void buildPoints10_20();
+    void buildNavPoints();
 
 private:
     MriDataProvider();
@@ -85,6 +86,8 @@ private:
     bool pointIsInitialized(double* point);
     // Создает мапу для удобного доступа к точкам
     void initMap10_20();
+    // Сбрасывает данные провайдера при смене исследования
+    void resetProviderData();
 
 private:
     // Директория с исследованием
@@ -118,6 +121,10 @@ private:
     vtkSmartPointer<vtkPoints> points10_20;
     vtkSmartPointer<vtkActor> points10_20actors[21];
     std::map<std::string, int> points10_20map;
+
+    // Точки для навигации (пока в таком виде, тк не знаю требуемый формат данных)
+    vtkSmartPointer<vtkPoints> nav_points;
+    vtkSmartPointer<vtkActor> nav_points_actor;
 };
 
 #endif // MRI_DATA_PROVIDER_H

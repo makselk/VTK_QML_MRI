@@ -123,10 +123,22 @@ Window {
                     anchors {
                         left: parent.left
                         right: parent.right
-                        bottom: button.top
+                        bottom: button_nav_points.top
                         margins: 10
                     }
                     onClicked: mri_data_provider.buildPoints10_20()
+                }
+
+                Button {
+                    id: button_nav_points
+                    text: "Навигация по точкам"
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        bottom: button.top
+                        margins: 10
+                    }
+                    onClicked: mri_data_provider.buildNavPoints();
                 }
 
                 Button {
