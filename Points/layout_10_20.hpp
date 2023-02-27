@@ -22,8 +22,8 @@ namespace LAYOUT_10_20 {
     vtkSmartPointer<vtkPoints> mark(vtkPolyData* model,
                                     vtkKdTreePointLocator* kd_tree,
                                     vtkOBBTree* obb_tree,
-                                    double* nasion,
                                     double* inion,
+                                    double* nasion,
                                     double* tragus_l,
                                     double* tragus_r,
                                     double* center);
@@ -35,8 +35,8 @@ namespace LAYOUT_10_20 {
     /// @param tragus_l 
     /// @param tragus_r 
     /// @param center 
-    void centerOfMass(double* nasion,
-                      double* inion,
+    void centerOfMass(double* inion,
+                      double* nasion,
                       double* tragus_l,
                       double* tragus_r,
                       double* center);

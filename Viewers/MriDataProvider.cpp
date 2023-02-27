@@ -1,5 +1,6 @@
 #include "MriDataProvider.h"
 #include "Model/model_builder.hpp"
+#include "Points/layout_10_20.hpp"
 
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
@@ -88,9 +89,59 @@ void MriDataProvider::pickBasePoint(int point) {
     }
 }
 
+void MriDataProvider::buildPoints10_20() {
+    // Проверка существования базовых точек
+    for(int i = 0; i != 4; ++i) {
+        if(!pointIsInitialized(base_points[i]))
+            return;
+    }
+    // Инициализация ценра
+    LAYOUT_10_20::centerOfMass(base_points[0],
+                               base_points[1],
+                               base_points[2],
+                               base_points[3],
+                               base_points[4]);
+    // Строим деревья
+    if(!obb_tree) {
+        obb_tree = vtkSmartPointer<vtkOBBTree>::New();
+        obb_tree->SetDataSet(model);
+        obb_tree->BuildLocator();
+    }
+    if(!kd_tree) {
+        kd_tree = vtkSmartPointer<vtkKdTreePointLocator>::New();
+        kd_tree->SetDataSet(model);
+        kd_tree->BuildLocator();
+    }
+    // Получение точек 10-20
+    points10_20 = LAYOUT_10_20::mark(model, kd_tree, obb_tree, base_points[0], base_points[1],
+                                     base_points[2], base_points[3], base_points[4]);
+    // Отметка их на 3д
+    for(int i = 0; i != points10_20->GetNumberOfPoints(); ++i) {
+        if(points10_20actors[i])
+            model_viewer->getRenderer()->removeActor(points10_20actors[i]);
+        double point[3];
+        points10_20->GetPoint(i, point);
+        points10_20actors[i] = LAYOUT_10_20::pointActor(point, 0, 0, 1);
+        model_viewer->getRenderer()->addActor(points10_20actors[i]);
+    }
+
+    double test_point_0[3];
+    double test_point_1[3];
+    double test_point_2[3];
+
+    getPoint10_20("F3", test_point_0);
+    getPoint10_20("Pz", test_point_1);
+    getPoint10_20("T4", test_point_2);
+
+    std::cout << test_point_0[0] << " " << test_point_0[1] << " " << test_point_0[2] << std::endl;
+    std::cout << test_point_1[0] << " " << test_point_1[1] << " " << test_point_1[2] << std::endl;
+    std::cout << test_point_2[0] << " " << test_point_2[1] << " " << test_point_2[2] << std::endl;
+}
+
 MriDataProvider::MriDataProvider() {
     this->directory = "";
     this->data = vtkSmartPointer<vtkImageData>::New();
+    this->initMap10_20();
 }
 
 MriDataProvider& MriDataProvider::getInstance() {
@@ -126,7 +177,24 @@ void MriDataProvider::setBasePoint(double* point) {
         // Выключаем пикинг в plane_viewer'ах
         plane_viewer[i]->getRenderer()->pickingOff();
     }
+    // Если уже была отмечена точка - удаляем
+    if(base_points_actors[picking_base_point])
+        model_viewer->getRenderer()->removeActor(base_points_actors[picking_base_point]);
+    // Отмечаем новую
+    base_points_actors[picking_base_point] = LAYOUT_10_20::pointActor(point);
+    model_viewer->getRenderer()->addActor(base_points_actors[picking_base_point]);
+    // Сбрасываем режим выбора точки
     picking_base_point = -1;
+}
+
+void MriDataProvider::getPoint10_20(int index, double point[3]) {
+    if(points10_20)
+        points10_20->GetPoint(index, point);
+}
+
+void MriDataProvider::getPoint10_20(const std::string& name, double point[3]) {
+    if(points10_20)
+        points10_20->GetPoint(points10_20map[name], point);
 }
 
 bool MriDataProvider::readDirectoryVtk() {
@@ -195,4 +263,35 @@ bool MriDataProvider::readDirectoryVtk() {
 void MriDataProvider::setSlice(int i, int slice) {
     plane_viewer[i]->getRenderer()->setSlice(slice);
     model_viewer->getRenderer()->setSlice(i, slice);
+}
+
+bool MriDataProvider::pointIsInitialized(double* point) {
+    if(point[0] == 0 && point[1] == 0 && point[2] == 0)
+        return false;
+    return true;
+}
+
+void MriDataProvider::initMap10_20() {
+    points10_20map.clear();
+    points10_20map["Fpz"] = 0;
+    points10_20map["Fz"] = 1;
+    points10_20map["Cz"] = 2;
+    points10_20map["Pz"] = 3;
+    points10_20map["Oz"] = 4;
+    points10_20map["T3"] = 5;
+    points10_20map["C3"] = 6;
+    points10_20map["C4"] = 7;
+    points10_20map["T4"] = 8;
+    points10_20map["F7"] = 9;
+    points10_20map["Fp1"] = 10;
+    points10_20map["Fp2"] = 11;
+    points10_20map["F8"] = 12;
+    points10_20map["F3"] = 13;
+    points10_20map["F4"] = 14;
+    points10_20map["T5"] = 15;
+    points10_20map["O1"] = 16;
+    points10_20map["O2"] = 17;
+    points10_20map["T6"] = 18;
+    points10_20map["P3"] = 19;
+    points10_20map["P4"] = 20;
 }

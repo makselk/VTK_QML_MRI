@@ -4,12 +4,15 @@
 
 #include "QVTKPlaneViewer.h"
 #include "QVTKModelViewer.h"
+#include <map>
 #include <string>
 #include <QObject>
 #include <QString>
 #include <vtkDICOMImageReader.h>
 #include <vtkSmartPointer.h>
 #include <vtkImageData.h>
+#include <vtkKdTreePointLocator.h>
+#include <vtkOBBTree.h>
 
 
 class MriDataProvider: 
@@ -48,6 +51,7 @@ public slots:
     void setWindow(int value);
     void setLevel(int level);
     void pickBasePoint(int point);
+    void buildPoints10_20();
 
 private:
     MriDataProvider();
@@ -67,12 +71,20 @@ public:
     // Дергается из plane_viewer'a
     // Сохраняет значение пикнутой точки
     void setBasePoint(double* point);
+    // Получение точек 10-20 по индексу
+    void getPoint10_20(int index, double point[3]);
+    // Получение точек 10-20 по названию через мапу
+    void getPoint10_20(const std::string& name, double point[3]);
 
 private:
     // Чтение директории с исследованием с преобразованием координат
     bool readDirectoryVtk();
     // Задание номера среза в объектах, использующих провайдера
     void setSlice(int i, int slice);
+    // Проверка, задана точка или нет
+    bool pointIsInitialized(double* point);
+    // Создает мапу для удобного доступа к точкам
+    void initMap10_20();
 
 private:
     // Директория с исследованием
@@ -91,10 +103,21 @@ private:
     vtkSmartPointer<vtkPolyData> model;
     vtkSmartPointer<vtkActor> model_actor;
 
-    // Координаты базовых точек (инион, насион, козелок левый и правый)
-    double base_points[4][3] = {0};
+    // Деревья для построения точек
+    vtkSmartPointer<vtkKdTreePointLocator> kd_tree;
+    vtkSmartPointer<vtkOBBTree> obb_tree;
+
+    // Координаты базовых точек (инион, насион, козелок левый, правый, центр)
+    double base_points[5][3] = {0};
+    // Актеры базовых точек, отображаемых на 3д виде
+    vtkSmartPointer<vtkActor> base_points_actors[4];
     // Номер точки, выбор которой происходит на данный момент
     int picking_base_point = -1;
+
+    // Точки 10-20
+    vtkSmartPointer<vtkPoints> points10_20;
+    vtkSmartPointer<vtkActor> points10_20actors[21];
+    std::map<std::string, int> points10_20map;
 };
 
 #endif // MRI_DATA_PROVIDER_H

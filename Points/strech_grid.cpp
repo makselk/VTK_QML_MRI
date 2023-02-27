@@ -1,4 +1,4 @@
-#include <vtk_custom_utils/strech_grid.hpp>
+#include "strech_grid.hpp"
 #include <vtkTriangle.h>
 #include <vtkTransform.h>
 #include <vtkAppendPolyData.h>

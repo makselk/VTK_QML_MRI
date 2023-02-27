@@ -1,4 +1,4 @@
-#include <vtk_custom_utils/layout_10_20.hpp>
+#include "layout_10_20.hpp"
 
 // General
 #include <vtkNew.h>
@@ -700,8 +700,8 @@ namespace {
 vtkSmartPointer<vtkPoints> LAYOUT_10_20::mark(vtkPolyData* model,
                                               vtkKdTreePointLocator* kd_tree,
                                               vtkOBBTree* obb_tree,
-                                              double* nasion,
                                               double* inion,
+                                              double* nasion,
                                               double* tragus_l,
                                               double* tragus_r,
                                               double* center) {
@@ -710,7 +710,7 @@ vtkSmartPointer<vtkPoints> LAYOUT_10_20::mark(vtkPolyData* model,
 
     // Аппроксимируем верхнюю часть головы сферой (обрезанной)
     vtkNew<vtkPolyData> upper;
-    double sphere_radius;
+    double sphere_radius = 0;
     approxModelWithSphere(nasion, inion, tragus_l, tragus_r, center, upper, sphere_radius);
 
     // Точки 10-20
@@ -750,8 +750,8 @@ vtkSmartPointer<vtkPoints> LAYOUT_10_20::mark(vtkPolyData* model,
 /// @param tragus_l 
 /// @param tragus_r 
 /// @param center 
-void LAYOUT_10_20::centerOfMass(double* nasion,
-                                double* inion,
+void LAYOUT_10_20::centerOfMass(double* inion,
+                                double* nasion,
                                 double* tragus_l,
                                 double* tragus_r,
                                 double* center) {

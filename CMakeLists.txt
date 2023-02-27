@@ -39,10 +39,16 @@ set(MODEL_SOURCES
         Model/utility_dcm.cpp
 )
 
+set(POINTS_SOURCES
+        Points/layout_10_20.cpp
+        Points/strech_grid.cpp
+)
+
 add_executable(vtk_viewer
         ${PROJECT_SOURCES}
         ${VIEWERS_SOURCES}
         ${MODEL_SOURCES}
+        ${POINTS_SOURCES}
 )
 
 target_link_libraries(vtk_viewer PRIVATE

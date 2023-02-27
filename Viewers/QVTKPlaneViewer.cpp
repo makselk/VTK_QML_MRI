@@ -252,7 +252,6 @@ void QVTKPlaneViewerRenderer::setMouseReleaseEventR(QMouseEvent* e) {
 void QVTKPlaneViewerRenderer::handleEvents() {
     // ЛКМ нажата
     if(picking_enabled && m_mouse_press_l && !m_mouse_press_l->isAccepted()) {
-        std::cout << " PiZdA" << std::endl;
         // Перевод принятых координат из qml в vtk'шные
         int x,y;
         x = m_mouse_press_l->x();

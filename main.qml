@@ -126,6 +126,7 @@ Window {
                         bottom: button.top
                         margins: 10
                     }
+                    onClicked: mri_data_provider.buildPoints10_20()
                 }
 
                 Button {
