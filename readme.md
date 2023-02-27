@@ -1,7 +1,7 @@
-### Базовое приложение, готовое к интеграции в проект
+## Базовое приложение, готовое к интеграции в проект
 ---
 
-## Зависимости:
+### Зависимости:
 1. Dcmtk: 'sudo apt install libdcmtk2-dev'
 2. CGAL: 'sudo apt-get install libcgal-dev'
 3. OpenCV (можно без contrib): https://github.com/opencv/opencv.git
